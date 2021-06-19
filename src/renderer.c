@@ -8,6 +8,24 @@ void render_grid(t_vars *vars, int cell_size)
 	img->img = mlx_new_image(render->mlx, WIN_WIDTH, WIN_HEIGHT);
 	img->addr = mlx_get_data_addr(img->img, &img->bit_per_pixel, &img->size_line, &img->endian);
 
+	
+	for (int y = 0; y < 8; y++)
+	{
+		for (int x = 0; x < 8; x++)
+		{
+			if (get_map_value(vars->map, x, y))
+			{
+				for (int _y = 0; _y < WIN_HEIGHT / 8; _y++)
+				{
+					for (int _x = 0; _x < WIN_WIDTH / 8; _x++)
+					{
+						set_pixel_img(img, x * WIN_WIDTH / 8 + _x, y * WIN_HEIGHT / 8 + _y, 0x00333333);
+					}
+				}
+			}
+		}
+	}
+	
 	for (int y = 0; y < WIN_HEIGHT; y++)
 	{
 		for (int x = 0; x < WIN_WIDTH; x++)
