@@ -25,7 +25,7 @@ void render_grid(t_vars *vars, int cell_size)
 			}
 		}
 	}
-	
+
 	for (int y = 0; y < WIN_HEIGHT; y++)
 	{
 		for (int x = 0; x < WIN_WIDTH; x++)
@@ -65,3 +65,43 @@ void render_dot(t_vars *vars, int x, int y, int color)
 		}
 	}
 }
+
+void render_3D(t_vars *vars)
+{	
+	t_render *render = vars->render;
+	t_img *img = malloc(sizeof(t_img));
+	img->img = mlx_new_image(render->mlx, WIN_WIDTH, WIN_HEIGHT);
+	img->addr = mlx_get_data_addr(img->img, &img->bit_per_pixel, &img->size_line, &img->endian);
+
+	t_vector mouse_pos;
+	int x;
+	int y;
+	mlx_mouse_get_pos(vars->render->mlx, vars->render->window, &x, &y);
+	mouse_pos.x = x - 400;
+	mouse_pos.y = y - 400;
+	t_vector dir = vector_get_normal(mouse_pos);
+	double angle_dir = acos(dir.y) * DEGRE * (dir.x < 0 ? -1 : 1);
+
+
+	for (int x = 0; x < WIN_WIDTH; x++)
+	{
+		double add_angle = ((double)x * (double)FOV / (double)WIN_HEIGHT) - FOV / 2;
+		double cur_angle = angle_dir + add_angle;
+		t_raycast raycast = calc_raycast(vars, new_vector(4, 4), new_vector(sin((cur_angle) / DEGRE), cos((cur_angle) / DEGRE)));
+		int wall_height = (int)((double)WIN_HEIGHT / raycast.hit_dist / cos(add_angle / DEGRE));
+		for (int y = 0; y < WIN_HEIGHT; y++)
+		{
+			int color;
+			if (y < (WIN_WIDTH - wall_height) / 2) color = SKY_COLOR;
+			else if (y < ((WIN_WIDTH - wall_height) / 2) + wall_height) color = raycast.hit_color;
+			else color = GROUND_COLOR;
+			set_pixel_img(img, x, y, color);
+			//printf("set pixel color %d\n", color);
+		}
+	}
+	mlx_put_image_to_window(render->mlx, render->window_3D, img->img, 0, 0);
+	mlx_destroy_image(render->mlx, img->img);
+	free(img);
+
+}
+

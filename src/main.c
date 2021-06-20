@@ -21,7 +21,7 @@ int main()
 	}
 	init_mlx(vars);
 
-	printf("%f\n", fmod(5.5, 1.0));
+	printf("%f\n", fmod(-5.0, 1.0));
 
 	mlx_loop_hook(vars->render->mlx, update, vars);
 	mlx_loop(vars->render->mlx);
@@ -34,17 +34,19 @@ void init_mlx(t_vars *vars)
 	
 	vars->render->mlx = mlx_init();
 	vars->render->window = mlx_new_window(vars->render->mlx, WIN_WIDTH, WIN_HEIGHT, "Raycast-C");
+	vars->render->window_3D = mlx_new_window(vars->render->mlx, WIN_WIDTH, WIN_HEIGHT, "3D Render");
 }
 
 int update(t_vars *vars)
 {
 	vars->frame +=1;
-	if (vars->frame % 500 != 0)
+	if (vars->frame % 10 != 0)
 	{
 		return 1;
 	}
 	render_grid(vars, WIN_HEIGHT / 8);
-	render_raycast(vars);
+	//render_raycast(vars);
+	render_3D(vars);
 	fflush(stdout);
 	return 1;
 }
