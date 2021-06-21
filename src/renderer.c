@@ -67,27 +67,32 @@ void render_dot(t_vars *vars, int x, int y, int color)
 }
 
 void render_3D(t_vars *vars)
-{	
-	t_render *render = vars->render;
-	t_img *img = malloc(sizeof(t_img));
-	img->img = mlx_new_image(render->mlx, WIN_WIDTH, WIN_HEIGHT);
-	img->addr = mlx_get_data_addr(img->img, &img->bit_per_pixel, &img->size_line, &img->endian);
+{
 
 	t_vector mouse_pos;
 	int x;
 	int y;
 	mlx_mouse_get_pos(vars->render->mlx, vars->render->window, &x, &y);
-	mouse_pos.x = x - 400;
-	mouse_pos.y = y - 400;
+	mouse_pos.x = ((double)x / (double)WIN_WIDTH * 8) - vars->player->position.x;
+	mouse_pos.y = ((double)y / (double)WIN_HEIGHT * 8) - vars->player->position.y;
+	//printf("\r%f %f    %f %f             ", mouse_pos.x, mouse_pos.y, x / (double)WIN_WIDTH, y / (double)WIN_HEIGHT);
 	t_vector dir = vector_get_normal(mouse_pos);
 	double angle_dir = acos(dir.y) * DEGRE * (dir.x < 0 ? -1 : 1);
+	
+	if (vars->player->angle == angle_dir) return;
+	vars->player->angle = angle_dir;
+	render_grid(vars, WIN_HEIGHT / 8);
 
+	t_render *render = vars->render;
+	t_img *img = malloc(sizeof(t_img));
+	img->img = mlx_new_image(render->mlx, WIN_WIDTH, WIN_HEIGHT);
+	img->addr = mlx_get_data_addr(img->img, &img->bit_per_pixel, &img->size_line, &img->endian);
 
 	for (int x = 0; x < WIN_WIDTH; x++)
 	{
 		double add_angle = ((double)x * (double)FOV / (double)WIN_HEIGHT) - FOV / 2;
 		double cur_angle = angle_dir + add_angle;
-		t_raycast raycast = calc_raycast(vars, new_vector(4, 4), new_vector(sin((cur_angle) / DEGRE), cos((cur_angle) / DEGRE)));
+		t_raycast raycast = calc_raycast(vars, vars->player->position, new_vector(sin((cur_angle) / DEGRE), cos((cur_angle) / DEGRE)));
 		int wall_height = (int)((double)WIN_HEIGHT / raycast.hit_dist / cos(add_angle / DEGRE));
 		for (int y = 0; y < WIN_HEIGHT; y++)
 		{

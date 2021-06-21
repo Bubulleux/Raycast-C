@@ -9,16 +9,26 @@
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 800
 
-#define FOV 80
+#define FOV 0
 
 #define DEGRE 57.2958
 
+#define SPEED 0.5
+#define FPS 60
+
+//Color
 #define SKY_COLOR 0x00ffff
 #define WALL_COLOR_UP 0xff0000
 #define WALL_COLOR_DOWN 0xaa0000
 #define WALL_COLOR_LEFT 0x7700000
 #define WALL_COLOR_RIGHT 0x330000
 #define GROUND_COLOR 0x333333
+
+//Input
+#define UP_ARROW 65362
+#define DOWN_ARROW 65364
+#define LEFT_ARROW 65361
+#define RIGHT_ARROW 65363
 
 //----------Struct----------
 
@@ -37,6 +47,21 @@ typedef struct s_vector
 	double y;
 } t_vector;
 
+typedef struct s_input
+{
+	int up_pressed;
+	int down_pressed;
+	int left_pressed;
+	int right_pressed;
+} t_input;
+
+typedef struct s_player
+{
+	t_vector position;
+	double angle;
+} t_player;
+
+
 typedef struct s_render
 {
 	void *mlx;
@@ -46,9 +71,14 @@ typedef struct s_render
 
 typedef struct s_vars
 {
-	t_render *render;
 	int frame;
 	unsigned int *map;
+	double last_time_update;
+	double delta_time;
+
+	t_input *input;
+	t_render *render;
+	t_player *player;
 } t_vars;
 
 
@@ -66,6 +96,7 @@ typedef struct s_raycast
 void init_mlx(t_vars *vars);
 int update(t_vars *vars);
 char get_map_value(unsigned int *map, int x, int y);
+long long current_timestamp();
 
 //renderer.c
 void render_grid(t_vars *vars, int cell_size);
@@ -83,3 +114,12 @@ t_vector vector_get_normal(t_vector vector);
 double vector_get_magnetude(t_vector vector);
 t_vector new_vector(double x, double y);
 t_vector get_intersection(double a, double b, double a_prime, double b_prime);
+
+//input.c
+int key_pressed(int key, t_input *input);
+int key_relased(int key, t_input *input);
+void init_input(t_vars *vars);
+
+//player.c
+void update_player(t_input *input, t_player *player, double deltat_ime);
+void init_player(t_vars *vars);

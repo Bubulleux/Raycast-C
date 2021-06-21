@@ -25,37 +25,45 @@ t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir)
 	
 	t_vector pos = new_vector(0, 0);
 	t_raycast raycast;
+	//printf("%f %f\n", origin.x, origin.y);
+	render_dot(vars, origin.x / 8 * WIN_WIDTH, origin.y / 8 * WIN_HEIGHT, 0xffff00);
 
 	if (dir.y == 0 || dir.x == 0) return raycast;
 
 	double slop_x = dir.y / dir.x;
+	double b_x = origin.y - (origin.x * slop_x);
+	b_x = fmod(origin.x, 1);
+
 	double slop_y = dir.x / dir.y;
+	double b_y = origin.x - (origin.y * slop_y);
+	b_y = fmod(origin.y, 1);
+
 
 	for (int i; i < 10; i++)
 	{
-		double next_line_y =  floor((pos.y + ((dir.y < 0 && fmod(abs(dir.y), 1) == 0) ? -0.01 : 0))) + (dir.y < 0? 0 : 1);
+		double next_line_y =  floor(pos.y + ((dir.y < 0 && fmod(abs(pos.y + b_y), 1.0) == 0) ? -0.01 : 0) + 0) + (dir.y < 0? 0 : 1) - b_y;
 		t_vector intersection_y = get_intersection(slop_x, 0, 0, next_line_y);
 		//intersection_y.x *= -1;
 
-		double next_line_x =  floor((pos.x + ((dir.x < 0 && fmod(abs(dir.x), 1.0) == 0) ? -0.01 : 0))) + (dir.x < 0? 0 : 1);
+		double next_line_x =  floor(pos.x + ((dir.x < 0 && fmod(abs(pos.x + b_x), 1.0) == 0) ? -0.01 : 0) + 0) + (dir.x < 0? 0 : 1) - b_x;
 		t_vector intersection_x = get_intersection(slop_y, 0, 0, next_line_x);
 		intersection_x = new_vector(intersection_x.y, intersection_x.x);
 
 		double magnetude_x = vector_get_magnetude(new_vector(intersection_x.x - pos.x, intersection_x.y - pos.y));
 		double magnetude_y = vector_get_magnetude(new_vector(intersection_y.x - pos.x, intersection_y.y - pos.y));
-		//printf("pos: %f %f, y: %f, x: %f\n", pos.x, pos.y, next_line_y, next_line_x);
+		printf("pos: %f %f, y: %f, x: %f, next_x: %f, next_y: %f\n", pos.x, pos.y, b_y , b_x, next_line_x, next_line_y);
 		//t_vector intersection = intersection_y;
-		// render_dot(vars, (int)floor(intersection_x.x * WIN_WIDTH / 8) + 400, (int)floor(intersection_x.y * WIN_HEIGHT / 8) + 400, 0x0000FF);
-		// render_dot(vars, (int)floor(intersection_y.x * WIN_WIDTH / 8) + 400, (int)floor(intersection_y.y * WIN_HEIGHT / 8) + 400, 0x0000FF);
+		render_dot(vars, (int)floor((intersection_x.x + origin.x) * WIN_WIDTH / 8), (int)floor((intersection_x.y + origin.y) * WIN_HEIGHT / 8), 0x0000FF);
+		render_dot(vars, (int)floor((intersection_y.x + origin.y) * WIN_WIDTH / 8) + 400, (int)floor((intersection_y.y + origin.y) * WIN_HEIGHT / 8), 0x0000FF);
 		t_vector intersection = (magnetude_y > magnetude_x) ? intersection_x : intersection_y;
-		render_dot(vars, (int)floor(intersection.x * WIN_WIDTH / 8) + 400, (int)floor(intersection.y * WIN_HEIGHT / 8) + 400, 0xff0000);
+		render_dot(vars, (int)floor((intersection.x + origin.x) * (double)WIN_WIDTH / 8.0), (int)floor((intersection.y + origin.y) * (double)WIN_HEIGHT / 8.0), 0xff0000);
 		//printf("x: %f y: %f, pos: %f %f,  x: %f %f y:%f %f\n", magnetude_x, magnetude_y, pos.x, pos.y, intersection_x.x, intersection_x.y, intersection_y.x, intersection_y.y);
 
 
 		pos.x = intersection.x;
 		pos.y = intersection.y;
 		int colide = collide_face(vars, pos.x + origin.x, pos.y + origin.y);
-		//printf("%f %f %d\n", pos.x + origin.x, pos.y + origin.y, colide);
+		//printf("%f %f %d\n", pos.x + origin.x, pos.y + origin.x, colide);
 		if (colide != 0)
 		{
 			raycast.hit_pos = new_vector(pos.x + origin.x, pos.y + origin.y);
