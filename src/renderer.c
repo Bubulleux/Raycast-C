@@ -143,7 +143,7 @@ void render_3D(t_vars *vars)
 			{
 				color = get_pixel_img(render->wall_img,  (int)(raycast.x_hit * TEXTURE_SIZE), (int)((y - ground_height) / (double)wall_height * TEXTURE_SIZE));
 				color = multiplie_color(color, raycast.hit_color);
-				//printf("%d", (int)((y - ground_height) / (double)wall_height * TEXTURE_SIZE));
+				//printf(" y: %d %d %f,", y, color, raycast.hit_color);
 			}
 			else color = GROUND_COLOR;
 			set_pixel_img(img, x, y, color);

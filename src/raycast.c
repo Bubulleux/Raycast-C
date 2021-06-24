@@ -68,7 +68,7 @@ t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir)
 
 		pos.x = intersection.x;
 		pos.y = intersection.y;
-		int colide = collide_face(vars, pos.x + origin.x, pos.y + origin.y);
+		double colide = collide_face(vars, pos.x + origin.x, pos.y + origin.y);
 		//printf("%f %f %d\n", pos.x + origin.x, pos.y + origin.x, colide);
 		if (colide != -1)
 		{
