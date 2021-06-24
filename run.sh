@@ -5,7 +5,7 @@ GREEN="\e[1;32m"
 NOCOLOR="\033[0m"
 
 SRC="src/"
-INCLUDE="./ -I/usr/include -O3 -I/usr/include/mlx -L/usr/include/mlx -lmlx -L/usr/lib -lXext -lX11 -lm -lbsd"
+INCLUDE="./ -I/usr/include -O3 -I/usr/include/mlx -L/usr/include/mlx -lmlx -L/usr/lib -lXext -lX11 -lm "
 
 SRC_FILE="${SRC}*.c"
 FILES=""

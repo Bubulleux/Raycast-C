@@ -28,3 +28,12 @@ void init_input(t_vars *vars)
 	vars->input->right_pressed = 0;
 	vars->input->left_pressed = 0;
 }
+
+void update_mouse(t_input *input, t_vars *vars)
+{
+	int x;
+	int y;
+	mlx_mouse_get_pos(vars->render->mlx, vars->render->window_3D, &x, &y);
+	set_vector(&input->mouse_delta, x - input->mouse_pos.x, y - input->mouse_pos.y);
+	set_vector(&input->mouse_pos, x, y);
+}

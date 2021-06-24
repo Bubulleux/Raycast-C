@@ -1,5 +1,20 @@
 #include "define.h"
 
+void init_mlx(t_vars *vars)
+{
+	vars->render = malloc(sizeof(t_render));
+	
+	vars->render->mlx = mlx_init();
+	vars->render->window_3D = mlx_new_window(vars->render->mlx, WIN_WIDTH, WIN_HEIGHT, "3D Render");
+	vars->render->window = mlx_new_window(vars->render->mlx, WIN_WIDTH, WIN_HEIGHT, "Raycast-C");
+
+	t_render *render = vars->render;
+	render->wall_img = malloc(sizeof(t_img));
+	int size;
+	render->wall_img->img = mlx_xpm_file_to_image(render->mlx, "texture/wall.xpm", &size, &size);
+	render->wall_img->addr = mlx_get_data_addr(render->wall_img->img, &render->wall_img->bit_per_pixel, &render->wall_img->size_line, &render->wall_img->endian);
+}
+
 void render_grid(t_vars *vars, int cell_size)
 {
 	t_render *render = vars->render;
@@ -38,6 +53,7 @@ void render_grid(t_vars *vars, int cell_size)
 	}
 
 	mlx_put_image_to_window(render->mlx, render->window, img->img, 0, 0);
+	mlx_put_image_to_window(render->mlx, render->window, render->wall_img->img, 0, 0);
 	mlx_destroy_image(render->mlx, img->img);
 	free(img);
 }
@@ -49,6 +65,29 @@ void set_pixel_img(t_img *img, int x, int y, int color)
 	*dst = img->addr + (y * img->size_line + x * (img->bit_per_pixel / 8));
 	*(unsigned int*)*dst = color;
 	free(dst);
+}
+
+int get_pixel_img(t_img *img, int x, int y)
+{
+	char **dst;
+	dst = malloc(sizeof(char*));
+	*dst = img->addr + (y * img->size_line + x * (img->bit_per_pixel / 8));
+	int color = *(unsigned int*)*dst;
+	free(dst);
+	return color;
+}
+
+int multiplie_color(int color, double multiple)
+{
+	unsigned int color_out = 0x0;
+	for(int i = 0; i < 3; i++)
+	{
+		char value = (char)((double)((color >> i * 8) & 0xFF) * multiple);
+		color_out >>= 1 * 8;
+		color_out = color_out | (value << 2 * 8);
+		//printf("%x  %x %x\n", color_out, value, color >> i * 8);
+	}
+	return color_out;
 }
 
 void render_dot(t_vars *vars, int x, int y, int color)
@@ -78,9 +117,10 @@ void render_3D(t_vars *vars)
 	//printf("\r%f %f    %f %f             ", mouse_pos.x, mouse_pos.y, x / (double)WIN_WIDTH, y / (double)WIN_HEIGHT);
 	t_vector dir = vector_get_normal(mouse_pos);
 	double angle_dir = acos(dir.y) * DEGRE * (dir.x < 0 ? -1 : 1);
+	angle_dir = vars->player->angle;
 	
-	if (vars->player->angle == angle_dir) return;
-	vars->player->angle = angle_dir;
+	//if (vars->player->angle == angle_dir) return;
+
 	render_grid(vars, WIN_HEIGHT / 8);
 
 	t_render *render = vars->render;
@@ -91,18 +131,26 @@ void render_3D(t_vars *vars)
 	for (int x = 0; x < WIN_WIDTH; x++)
 	{
 		double add_angle = ((double)x * (double)FOV / (double)WIN_HEIGHT) - FOV / 2;
-		double cur_angle = angle_dir + add_angle;
+		double cur_angle = angle_dir - add_angle;
 		t_raycast raycast = calc_raycast(vars, vars->player->position, new_vector(sin((cur_angle) / DEGRE), cos((cur_angle) / DEGRE)));
 		int wall_height = (int)((double)WIN_HEIGHT / raycast.hit_dist / cos(add_angle / DEGRE));
+		int ground_height = (WIN_WIDTH - wall_height) / 2;
 		for (int y = 0; y < WIN_HEIGHT; y++)
 		{
 			int color;
-			if (y < (WIN_WIDTH - wall_height) / 2) color = SKY_COLOR;
-			else if (y < ((WIN_WIDTH - wall_height) / 2) + wall_height) color = raycast.hit_color;
+			if (y < ground_height) color = SKY_COLOR;
+			else if (y < ground_height + wall_height) 
+			{
+				color = get_pixel_img(render->wall_img,  (int)(raycast.x_hit * TEXTURE_SIZE), (int)((y - ground_height) / (double)wall_height * TEXTURE_SIZE));
+				color = multiplie_color(color, raycast.hit_color);
+				//printf("%d", (int)((y - ground_height) / (double)wall_height * TEXTURE_SIZE));
+			}
 			else color = GROUND_COLOR;
 			set_pixel_img(img, x, y, color);
 			//printf("set pixel color %d\n", color);
 		}
+		//printf("\n");
+		//printf("\rx_hit %f", raycast.x_hit);
 	}
 	mlx_put_image_to_window(render->mlx, render->window_3D, img->img, 0, 0);
 	mlx_destroy_image(render->mlx, img->img);
