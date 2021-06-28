@@ -24,8 +24,9 @@ int main()
 	init_player(vars);
 
 	//printf("%f\n", fmod(-5.0, 1.0));
-	printf("%x\n", multiplie_color(0xff5b02, 0.3));
 	parse_file("map.txt");
+	printf("\nsize of 'abcde': %ld\n", sizeof("") / sizeof(char));
+	printf("%x\n", multiplie_color(0xff5b02, 0.3));
 
 	mlx_loop_hook(vars->render->mlx, update, vars);
 	mlx_loop(vars->render->mlx);

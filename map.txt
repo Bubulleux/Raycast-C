@@ -1,6 +1,6 @@
-#Map SIZE
+!Map SIZE
 SIZE 16;
-#Map
+!Map
 MAP;
 .........###....
 .........###....

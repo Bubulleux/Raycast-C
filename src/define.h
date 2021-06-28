@@ -137,3 +137,4 @@ void init_player(t_vars *vars);
 
 //map_parser.c
 char* parse_file(char *file_name);
+char** parse_line(char* line);
