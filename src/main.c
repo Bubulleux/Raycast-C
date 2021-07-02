@@ -24,7 +24,7 @@ int main()
 	init_player(vars);
 
 	//printf("%f\n", fmod(-5.0, 1.0));
-	parse_file("map.txt");
+	//parse_file("map.txt");
 	printf("\nsize of 'abcde': %ld\n", sizeof("") / sizeof(char));
 	printf("%x\n", multiplie_color(0xff5b02, 0.3));
 

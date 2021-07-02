@@ -137,4 +137,8 @@ void init_player(t_vars *vars);
 
 //map_parser.c
 char* parse_file(char *file_name);
-char** parse_line(char* line);
+char*** parse_line(char *txt, int size);
+char* clean_file(char* txt, int size, int *end_size_ptr);
+char* resize_char(char *txt, int size);
+void resize_char_ptr(char *src, char *ptr, int size);
+void count_txt_elemente(char *txt, int txt_size, int *line_count_ptr, int **elemente_count_ptr);
