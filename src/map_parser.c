@@ -60,9 +60,9 @@ char* resize_char(char *txt, int size)
 	for (int i = 0; i < size; i ++)
 	{
 		resized_txt[i] = txt[i];
-		printf("%s\n", resized_txt);
+		//printf("%s\n", resized_txt);
 	}
-	printf("\n&& %s %c\n", resized_txt, resized_txt[size]);
+	//printf("\n&& %s %c\n", resized_txt, resized_txt[size]);
 	return resized_txt;
 }
 
@@ -72,7 +72,7 @@ void resize_char_ptr(char *src, char *ptr, int size)
     {
         ptr[i] = src[i];
     }
-    printf("&& %s\n", ptr);
+    //printf("&& %s\n", ptr);
 }
 
 char*** parse_line(char *txt, int size)
@@ -84,7 +84,7 @@ char*** parse_line(char *txt, int size)
 	{
 		//printf("\n%d", elemente_count[i]);
 	}
-	printf("\n");
+    return txt_parsed;
 
 	char ***txt_parsed = malloc(sizeof(char**) * line_count);
 
@@ -106,7 +106,7 @@ char*** parse_line(char *txt, int size)
             char *ptr_txt = malloc(sizeof(char) * 32);
             txt_parsed[cur_line][cur_elemente_index] = ptr_txt;
             resize_char_ptr(elemente_buffer, txt_parsed[cur_line][cur_elemente_index], 32);
-			printf("%d %s  %s\n",cur_elemente_char_index, resized_ellemente, elemente_buffer);
+			//printf("%d %s  %s\n",cur_elemente_char_index, resized_ellemente, elemente_buffer);
 			free(elemente_buffer);
 			elemente_buffer = malloc(sizeof(char) * 32);
 			for (int j = 0; j < 32; j++) {elemente_buffer[j] = 0x0;}
@@ -137,7 +137,7 @@ char*** parse_line(char *txt, int size)
 	{
 		for (int elemente = 0; elemente < elemente_count[line]; elemente ++)
 		{
-			printf("%s ,", txt_parsed[line][elemente]);
+			printf("%s, ", txt_parsed[line][elemente]);
 		}
 		printf(";\n");
 	}
