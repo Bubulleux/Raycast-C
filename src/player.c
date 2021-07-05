@@ -12,7 +12,7 @@ void update_player(t_input *input, t_player *player, double deltat_ime)
 		player->position.x + sin(angle_vel + player->angle / DEGRE) * velocity_magnetude * SPEED * deltat_ime,
 		player->position.y + cos(angle_vel + player->angle / DEGRE) * velocity_magnetude * SPEED * deltat_ime);
 
-	printf("\r%f %f %f %f", player->position.x, player->position.y, angle_vel * DEGRE, velocity_magnetude);
+	//printf("\r%f %f %f %f", player->position.x, player->position.y, angle_vel * DEGRE, velocity_magnetude);
 }
 
 void init_player(t_vars *vars)

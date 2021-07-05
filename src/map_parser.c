@@ -34,6 +34,89 @@ char* parse_file(char *file_name)
 	return "";
 }
 
+char** parse_map_file(char *file_name, t_vars *vars)
+{
+    FILE *file = fopen(file_name, "r");
+    char *buff = malloc(sizeof(char) * 32);
+    char *file_char = malloc(sizeof(char) * 32 * 50);
+    int width_map = -1;
+    int height_map = 0;
+    for (int line = 0; line < 50; line++)
+    {
+        char *return_fget = fgets(buff, 32, (FILE*)file);
+        //printf("%s\n", buff);
+        if (return_fget == NULL) break;
+        int line_length = 0;
+        for (int i = 0; i < 32; i++)
+        {
+            printf("%x ", buff[i]);
+            file_char[line * 32 + i] = buff[i];
+            if (buff[i] == 0xa) break;
+            line_length += 1;
+        }
+
+        if (width_map == -1) width_map = line_length;
+        if (width_map != line_length)
+        {
+            printf("Map File error");
+            exit(0);
+        }
+        height_map += 1;
+        printf("\n");
+        printf("%s\n", buff);
+    }
+
+    char **map = malloc(sizeof (char*) * width_map);
+
+
+    for (int x = 0; x < width_map; x += 1)
+    {
+        map[x] = malloc(sizeof (char) * height_map);
+        for (int y = 0; y < height_map; y += 1)
+        {
+            printf("%c", file_char[ y * 32 + x]);
+            char cell = 0x0;
+            char cur_char = file_char[ y * 32 + x];
+            switch (cur_char)
+            {
+                case '#':
+                    cell = 0xF;
+                    break;
+                case '.':
+                    cell = 0x0;
+                    break;
+                case 'P':
+                    cell = 0x0;
+                    break;
+                default:
+                    cell = 0x0;
+                    break;
+            }
+            map[x][y] = cell;
+        }
+        printf("\n");
+    }
+
+    for (int y = 0; y < height_map; y += 1)
+    {
+        for (int x = 0; x < width_map; x += 1)
+        {
+            printf("%x, ", map[x][y]);
+        }
+        printf("\n");
+    }
+
+    printf("width: %d, height: %d\n", width_map, height_map);
+    printf("\n%s", file_char);
+    printf("\n");
+
+    fclose(file);
+    free(buff);
+    vars->height_m = height_map;
+    vars->width_m = width_map;
+    return map;
+}
+
 char* clean_file(char* txt, int size, int *end_size_ptr)
 {
 	char *cleaned_file = malloc(sizeof(char) * size);
@@ -84,7 +167,6 @@ char*** parse_line(char *txt, int size)
 	{
 		//printf("\n%d", elemente_count[i]);
 	}
-    return txt_parsed;
 
 	char ***txt_parsed = malloc(sizeof(char**) * line_count);
 

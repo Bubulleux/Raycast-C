@@ -78,7 +78,9 @@ typedef struct s_render
 typedef struct s_vars
 {
 	int frame;
-	unsigned int *map;
+	char **map;
+	int height_m;
+	int width_m;
 	double last_time_update;
 	double delta_time;
 
@@ -101,7 +103,7 @@ typedef struct s_raycast
 
 //main.c
 int update(t_vars *vars);
-char get_map_value(unsigned int *map, int x, int y);
+char get_map_value(char **map, int x, int y);
 long long current_timestamp();
 
 //renderer.c
@@ -142,3 +144,4 @@ char* clean_file(char* txt, int size, int *end_size_ptr);
 char* resize_char(char *txt, int size);
 void resize_char_ptr(char *src, char *ptr, int size);
 void count_txt_elemente(char *txt, int txt_size, int *line_count_ptr, int **elemente_count_ptr);
+char** parse_map_file(char *file_name, t_vars *vars);

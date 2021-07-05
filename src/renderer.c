@@ -24,17 +24,17 @@ void render_grid(t_vars *vars, int cell_size)
 	img->addr = mlx_get_data_addr(img->img, &img->bit_per_pixel, &img->size_line, &img->endian);
 
 	
-	for (int y = 0; y < 8; y++)
+	for (int y = 0; y < vars->height_m; y++)
 	{
-		for (int x = 0; x < 8; x++)
+		for (int x = 0; x < vars->width_m; x++)
 		{
 			if (get_map_value(vars->map, x, y))
 			{
-				for (int _y = 0; _y < WIN_HEIGHT / 8; _y++)
+				for (int _y = 0; _y < WIN_HEIGHT / vars->height_m; _y++)
 				{
-					for (int _x = 0; _x < WIN_WIDTH / 8; _x++)
+					for (int _x = 0; _x < WIN_WIDTH / vars->width_m; _x++)
 					{
-						set_pixel_img(img, x * WIN_WIDTH / 8 + _x, y * WIN_HEIGHT / 8 + _y, 0x00333333);
+						set_pixel_img(img, x * WIN_WIDTH / vars->width_m + _x, y * WIN_HEIGHT / vars->height_m + _y, 0x00333333);
 					}
 				}
 			}
@@ -92,6 +92,7 @@ int multiplie_color(int color, double multiple)
 
 void render_dot(t_vars *vars, int x, int y, int color)
 {
+    return;
 	for (int _y = -2; _y <= 2; _y++)
 	{
 		for (int _x = -2; _x <= 2; _x++)
@@ -112,8 +113,8 @@ void render_3D(t_vars *vars)
 	int x;
 	int y;
 	mlx_mouse_get_pos(vars->render->mlx, vars->render->window, &x, &y);
-	mouse_pos.x = ((double)x / (double)WIN_WIDTH * 8) - vars->player->position.x;
-	mouse_pos.y = ((double)y / (double)WIN_HEIGHT * 8) - vars->player->position.y;
+	mouse_pos.x = ((double)x / (double)WIN_WIDTH * vars->width_m) - vars->player->position.x;
+	mouse_pos.y = ((double)y / (double)WIN_HEIGHT * vars->height_m) - vars->player->position.y;
 	//printf("\r%f %f    %f %f             ", mouse_pos.x, mouse_pos.y, x / (double)WIN_WIDTH, y / (double)WIN_HEIGHT);
 	t_vector dir = vector_get_normal(mouse_pos);
 	double angle_dir = acos(dir.y) * DEGRE * (dir.x < 0 ? -1 : 1);
@@ -121,14 +122,14 @@ void render_3D(t_vars *vars)
 	
 	//if (vars->player->angle == angle_dir) return;
 
-	render_grid(vars, WIN_HEIGHT / 8);
+	render_grid(vars, WIN_HEIGHT / vars->height_m);
 
 	t_render *render = vars->render;
 	t_img *img = malloc(sizeof(t_img));
 	img->img = mlx_new_image(render->mlx, WIN_WIDTH, WIN_HEIGHT);
 	img->addr = mlx_get_data_addr(img->img, &img->bit_per_pixel, &img->size_line, &img->endian);
 
-	for (int x = 0; x < WIN_WIDTH; x++)
+	for (int x = 0; x < (FOV == 0 ? 1: WIN_WIDTH); x++)
 	{
 		double add_angle = ((double)x * (double)FOV / (double)WIN_HEIGHT) - FOV / 2;
 		double cur_angle = angle_dir - add_angle;
