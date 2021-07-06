@@ -13,6 +13,10 @@ void init_mlx(t_vars *vars)
 	int size;
 	render->wall_img->img = mlx_xpm_file_to_image(render->mlx, "texture/wall.xpm", &size, &size);
 	render->wall_img->addr = mlx_get_data_addr(render->wall_img->img, &render->wall_img->bit_per_pixel, &render->wall_img->size_line, &render->wall_img->endian);
+
+	render->box_img = malloc(sizeof(t_img));
+    render->box_img->img = mlx_xpm_file_to_image(render->mlx, "texture/box.xpm", &size, &size);
+    render->box_img->addr = mlx_get_data_addr(render->box_img->img, &render->box_img->bit_per_pixel, &render->box_img->size_line, &render->box_img->endian);
 }
 
 void render_grid(t_vars *vars, int cell_size)
@@ -28,7 +32,7 @@ void render_grid(t_vars *vars, int cell_size)
 	{
 		for (int x = 0; x < vars->width_m; x++)
 		{
-			if (get_map_value(vars->map, x, y))
+			if (get_map_value(vars, x, y, 0xF) == 0xF)
 			{
 				for (int _y = 0; _y < WIN_HEIGHT / vars->height_m; _y++)
 				{
@@ -92,7 +96,7 @@ int multiplie_color(int color, double multiple)
 
 void render_dot(t_vars *vars, int x, int y, int color)
 {
-    return;
+    //return;
 	for (int _y = -2; _y <= 2; _y++)
 	{
 		for (int _x = -2; _x <= 2; _x++)
@@ -108,7 +112,6 @@ void render_dot(t_vars *vars, int x, int y, int color)
 
 void render_3D(t_vars *vars)
 {
-
 	t_vector mouse_pos;
 	int x;
 	int y;
@@ -142,7 +145,21 @@ void render_3D(t_vars *vars)
 			if (y < ground_height) color = SKY_COLOR;
 			else if (y < ground_height + wall_height) 
 			{
-				color = get_pixel_img(render->wall_img,  (int)(raycast.x_hit * TEXTURE_SIZE), (int)((y - ground_height) / (double)wall_height * TEXTURE_SIZE));
+			    char wall_type = get_map_value(vars, raycast.map_box_hit.x, raycast.map_box_hit.y, 0xF0);
+			    t_img *wall_img = NULL;
+                switch (wall_type) {
+                    case 0x00:
+                        wall_img = render->wall_img;
+                        break;
+                    case 0x10:
+                        wall_img = render->box_img;
+                        break;
+                    default:
+                        wall_img = render->wall_img;
+                        break;
+
+                }
+				color = get_pixel_img(wall_img,  (int)(raycast.x_hit * TEXTURE_SIZE), (int)((y - ground_height) / (double)wall_height * TEXTURE_SIZE));
 				color = multiplie_color(color, raycast.hit_color);
 				//printf(" y: %d %d %f,", y, color, raycast.hit_color);
 			}

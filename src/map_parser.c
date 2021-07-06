@@ -49,7 +49,6 @@ char** parse_map_file(char *file_name, t_vars *vars)
         int line_length = 0;
         for (int i = 0; i < 32; i++)
         {
-            printf("%x ", buff[i]);
             file_char[line * 32 + i] = buff[i];
             if (buff[i] == 0xa) break;
             line_length += 1;
@@ -58,12 +57,10 @@ char** parse_map_file(char *file_name, t_vars *vars)
         if (width_map == -1) width_map = line_length;
         if (width_map != line_length)
         {
-            printf("Map File error");
+            printf("Map File error\n");
             exit(0);
         }
         height_map += 1;
-        printf("\n");
-        printf("%s\n", buff);
     }
 
     char **map = malloc(sizeof (char*) * width_map);
@@ -82,11 +79,16 @@ char** parse_map_file(char *file_name, t_vars *vars)
                 case '#':
                     cell = 0xF;
                     break;
+                case 'C':
+                    cell = 0x1F;
+                    break;
                 case '.':
                     cell = 0x0;
                     break;
                 case 'P':
                     cell = 0x0;
+                    vars->player->position.x = x + 0.5;
+                    vars->player->position.y = y + 0.5;
                     break;
                 default:
                     cell = 0x0;
@@ -97,18 +99,7 @@ char** parse_map_file(char *file_name, t_vars *vars)
         printf("\n");
     }
 
-    for (int y = 0; y < height_map; y += 1)
-    {
-        for (int x = 0; x < width_map; x += 1)
-        {
-            printf("%x, ", map[x][y]);
-        }
-        printf("\n");
-    }
-
     printf("width: %d, height: %d\n", width_map, height_map);
-    printf("\n%s", file_char);
-    printf("\n");
 
     fclose(file);
     free(buff);

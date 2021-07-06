@@ -25,7 +25,7 @@ int main()
 
 	//printf("%f\n", fmod(-5.0, 1.0));
 	//parse_file("config.txt");
-	vars->map = parse_map_file("map.txt", vars);
+	vars->map = parse_map_file(MAP, vars);
 	printf("\nsize of 'abcde': %ld\n", sizeof("") / sizeof(char));
 	printf("char: %c %x\n", ("abc")[3], (char)(("abc")[3]));
 	printf("%x\n", multiplie_color(0xff5b02, 0.3));
@@ -65,11 +65,15 @@ int update(t_vars *vars)
 }
 
 
-char get_map_value(char **map, int x, int y)
+char get_map_value(t_vars *vars, int x, int y, char layer)
 {
 //	int row = map[y];
 //	char value = (row >> ((7 - x) * 4)) & 0xf;
-	return map[x][y];
+    if (x < 0 || x >= vars->width_m || y < 0 || y >= vars->height_m)
+    {
+        return MAP_NULL;
+    }
+	return (vars->map[x][y] & layer);
 }
 
 long long current_timestamp()

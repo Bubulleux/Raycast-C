@@ -26,7 +26,7 @@ t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir)
 	t_vector pos = new_vector(0, 0);
 	t_raycast raycast;
 	//printf("%f %f\n", origin.x, origin.y);
-	render_dot(vars, origin.x / vars->width_m * WIN_WIDTH, origin.y / vars->height_m * WIN_HEIGHT, 0xffff00);
+	//render_dot(vars, origin.x / vars->width_m * WIN_WIDTH, origin.y / vars->height_m * WIN_HEIGHT, 0xffff00);
 
 	if (dir.y == 0 || dir.x == 0) return raycast;
 
@@ -58,10 +58,8 @@ t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir)
 		double magnetude_y = vector_get_magnetude(new_vector(intersection_y.x - pos.x, intersection_y.y - pos.y));
 		//printf("pos: %f %f, y: %f, x: %f, next_x: %f, next_y: %f, ix: %d, iy %d\n", pos.x, pos.y, b_y , b_x, next_line_x, next_line_y, i_x, i_y);
 		//t_vector intersection = intersection_y;
-		render_dot(vars, (int)floor((intersection_x.x + origin.x) * WIN_WIDTH / vars->width_m), (int)floor((intersection_x.y + origin.y) * WIN_HEIGHT / vars->height_m), 0x0000FF);
-		render_dot(vars, (int)floor((intersection_y.x + origin.y) * WIN_WIDTH / vars->width_m), (int)floor((intersection_y.y + origin.y) * WIN_HEIGHT / vars->height_m), 0x0000FF);
 		t_vector intersection = (magnetude_y > magnetude_x) ? intersection_x : intersection_y;
-		render_dot(vars, (int)floor((intersection.x + origin.x) * (double)WIN_WIDTH / (double)vars->width_m), (int)floor((intersection.y + origin.y) * (double)WIN_HEIGHT / (double)vars->height_m), 0xff0000);
+		//render_dot(vars, (int)floor((intersection.x + origin.x) * (double)WIN_WIDTH / (double)vars->width_m), (int)floor((intersection.y + origin.y) * (double)WIN_HEIGHT / (double)vars->height_m), 0xff0000);
 		//printf("x: %f y: %f, pos: %f %f,  x: %f %f y:%f %f\n", magnetude_x, magnetude_y, pos.x, pos.y, intersection_x.x, intersection_x.y, intersection_y.x, intersection_y.y);
 
 		if (magnetude_y > magnetude_x) i_x += 1;
@@ -76,12 +74,13 @@ t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir)
 			raycast.hit_dist = vector_get_magnetude(pos);
 			raycast.x_hit = (magnetude_y > magnetude_x) ? fmod(raycast.hit_pos.y, 1) : fmod(raycast.hit_pos.x, 1);
 			raycast.hit_color = colide;
-			
+			raycast.map_box_hit = get_map_cell_colide(vars, pos.x + origin.x, pos.y + origin.y, colide);
+            printf("%f %f\n", raycast.map_box_hit.x, raycast.map_box_hit.y);
 			break;
 		}
 	}
 
-	render_dot(vars, (int)(raycast.hit_pos.x * WIN_WIDTH / vars->width_m), (int)(raycast.hit_pos.y * WIN_HEIGHT / vars->height_m), 0x00ff00);
+	//render_dot(vars, (int)(raycast.hit_pos.x * WIN_WIDTH / vars->width_m), (int)(raycast.hit_pos.y * WIN_HEIGHT / vars->height_m), 0x00ff00);
 	return raycast;
 }
 
@@ -92,18 +91,44 @@ double collide_face(t_vars *vars, double x, double y)
     if (x >= (vars->width_m - 0.01)) return WALL_COLOR_LEFT;
     if (x <= 0.01) return WALL_COLOR_RIGHT;
 
-	if ((fmod(y, 1) == 0 && get_map_value(vars->map, x, y) == 0xF) || y >= vars->height_m) return WALL_COLOR_UP;
-	if ((fmod(y, 1) == 0 && get_map_value(vars->map, x, y - 1) == 0xF) || y <= 0) return WALL_COLOR_DOWN;
-	if ((fmod(x, 1) == 0 && get_map_value(vars->map, x, y) == 0xF)  || x >= vars->width_m) return WALL_COLOR_LEFT;
-	if ((fmod(x, 1) == 0 && get_map_value(vars->map, x - 1, y) == 0xF) || x <= 0) return WALL_COLOR_RIGHT;
 
-	// if ((fmod(y, 1) < 0.01 && get_map_value(vars->map, x, y) == 0xF) || y >= vars->height_m) return WALL_COLOR_UP;
-	// if ((fmod(y, 1) < 0.01 && get_map_value(vars->map, x, y - 1) == 0xF) || y <= 0) return WALL_COLOR_DOWN;
-	// if ((fmod(x, 1) < 0.01 && get_map_value(vars->map, x, y) == 0xF)  || x >= vars->width_m) return WALL_COLOR_LEFT;
-	// if ((fmod(x, 1) < 0.01 && get_map_value(vars->map, x - 1, y) == 0xF) || x <= 0) return WALL_COLOR_RIGHT;
 
+
+	if ((fmod(y, 1) == 0 && get_map_value(vars, x, y, 0xF) == 0xF) || y >= vars->height_m) return WALL_COLOR_UP;
+	if ((fmod(y, 1) == 0 && get_map_value(vars, x, y - 1, 0xF) == 0xF) || y <= 0) return WALL_COLOR_DOWN;
+	if ((fmod(x, 1) == 0 && get_map_value(vars, x, y, 0xF) == 0xF)  || x >= vars->width_m) return WALL_COLOR_LEFT;
+	if ((fmod(x, 1) == 0 && get_map_value(vars, x - 1, y, 0xF) == 0xF) || x <= 0) return WALL_COLOR_RIGHT;
 
 	return -1;
+}
+
+t_vector get_map_cell_colide(t_vars *vars, double _x, double _y, double color)
+{
+    double x = _x;
+    double y = _y;
+    if (color == WALL_COLOR_UP)
+    {
+        y -= 0;
+        x = (int)x;
+    }
+    if (color == WALL_COLOR_DOWN)
+    {
+        y -= 1;
+        x = (int)x;
+    }
+    if (color == WALL_COLOR_RIGHT)
+    {
+        x -= 1;
+        y = (int)y;
+    }
+
+    if (color == WALL_COLOR_LEFT)
+    {
+        x -= 0;
+        y = (int)y;
+    }
+
+    return new_vector(x, y);
 }
 
 t_vector get_intersection(double a, double b, double a_prime, double b_prime)

@@ -14,8 +14,12 @@
 
 #define DEGRE 57.2958
 
-#define SPEED 0.5
+#define SPEED 1
+
 #define FPS 60
+
+#define MAP "map.txt"
+#define MAP_NULL 0x99
 
 //Color
 #define SKY_COLOR 0x00ffff
@@ -32,6 +36,7 @@
 #define LEFT_ARROW 65361
 #define RIGHT_ARROW 65363
 #define SENSITIVITY 3.0
+
 
 //----------Struct----------
 
@@ -73,6 +78,7 @@ typedef struct s_render
 	void *window;
 	void *window_3D;
 	t_img *wall_img;
+    t_img *box_img;
 } t_render;
 
 typedef struct s_vars
@@ -96,6 +102,7 @@ typedef struct s_raycast
 	double hit_dist;
 	double x_hit;
 	double hit_color;
+	t_vector map_box_hit;
 } t_raycast;
 
 
@@ -103,7 +110,7 @@ typedef struct s_raycast
 
 //main.c
 int update(t_vars *vars);
-char get_map_value(char **map, int x, int y);
+char get_map_value(t_vars *vars, int x, int y, char layer);
 long long current_timestamp();
 
 //renderer.c
@@ -119,6 +126,7 @@ int multiplie_color(int color, double multiple);
 t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir);
 void render_raycast(t_vars *vars);
 double collide_face(t_vars *vars, double x, double y);
+t_vector get_map_cell_colide(t_vars *vars, double _x, double _y, double color);
 
 //vector.c
 t_vector vector_get_normal(t_vector vector);
