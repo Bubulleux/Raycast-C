@@ -26,9 +26,7 @@ int main()
 	//printf("%f\n", fmod(-5.0, 1.0));
 	//parse_file("config.txt");
 	vars->map = parse_map_file(MAP, vars);
-	printf("\nsize of 'abcde': %ld\n", sizeof("") / sizeof(char));
-	printf("char: %c %x\n", ("abc")[3], (char)(("abc")[3]));
-	printf("%x\n", multiplie_color(0xff5b02, 0.3));
+	printf("%f\n", fmod(-1.5, 1));
 
 	mlx_loop_hook(vars->render->mlx, update, vars);
 	mlx_loop(vars->render->mlx);
@@ -46,7 +44,7 @@ int update(t_vars *vars)
 	
 	vars->delta_time = (current_timestamp() - vars->last_time_update) / 1000.0;
 	
-	// printf("\r");
+	//printf("\r");
 	// for (int i = 0; i < 4; i++)
 	// {
 	// 	printf("%d ", vars->input_vars->inputs_pressed[i][1]);
@@ -59,7 +57,7 @@ int update(t_vars *vars)
 	//render_raycast(vars);
 	render_3D(vars);
 	//printf("\r %d %d %d %d", vars->input->up_pressed, vars->input->down_pressed, vars->input->left_pressed, vars->input->right_pressed);
-	printf("                   ");
+	//printf("                   ");
 	fflush(stdout);
 	return 1;
 }

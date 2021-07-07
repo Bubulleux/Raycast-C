@@ -10,7 +10,7 @@ void render_raycast(t_vars *vars)
 	mouse_pos.y = y - 400;
 	t_vector dir = vector_get_normal(mouse_pos);
 	double angle_dir = acos(dir.y) * DEGRE * (dir.x < 0 ? -1 : 1);
-	printf("\r%f %f   %f", asin(dir.x) * DEGRE, acos(dir.y) * DEGRE, angle_dir);
+	//printf("\r%f %f   %f", asin(dir.x) * DEGRE, acos(dir.y) * DEGRE, angle_dir);
 	 for (int i = -FOV / 2; i < FOV / 2; i++)
 	 {
 	 	t_raycast raycast = calc_raycast(vars, new_vector(4, 4), new_vector(sin((angle_dir + i) / DEGRE), cos((angle_dir + i) / DEGRE)));
@@ -41,8 +41,8 @@ t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir)
 	int i_x = 0;
 	int i_y = 0;
 
-    printf("\r");
-	for (int i; i < 20; i++)
+    //printf("\r");
+	for (int i; i < 50; i++)
 	{
 		//double next_line_y =  floor(pos.y + ((dir.y < 0 && fmod(abs(pos.y + b_y), 1.0) == 0) ? -0.01 : 0) + 0) + (dir.y < 0? 0 : 1) - b_y;
 		double next_line_y = (dir.y > 0 ? (1 - b_y) : -b_y) + i_y* (dir.y > 0 ? 1 : -1);
@@ -75,7 +75,7 @@ t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir)
 			raycast.x_hit = (magnetude_y > magnetude_x) ? fmod(raycast.hit_pos.y, 1) : fmod(raycast.hit_pos.x, 1);
 			raycast.hit_color = colide;
 			raycast.map_box_hit = get_map_cell_colide(vars, pos.x + origin.x, pos.y + origin.y, colide);
-            printf("%f %f\n", raycast.map_box_hit.x, raycast.map_box_hit.y);
+            //printf("%f %f\n", raycast.map_box_hit.x, raycast.map_box_hit.y);
 			break;
 		}
 	}
@@ -90,9 +90,6 @@ double collide_face(t_vars *vars, double x, double y)
     if (y <= 0.01) return WALL_COLOR_DOWN;
     if (x >= (vars->width_m - 0.01)) return WALL_COLOR_LEFT;
     if (x <= 0.01) return WALL_COLOR_RIGHT;
-
-
-
 
 	if ((fmod(y, 1) == 0 && get_map_value(vars, x, y, 0xF) == 0xF) || y >= vars->height_m) return WALL_COLOR_UP;
 	if ((fmod(y, 1) == 0 && get_map_value(vars, x, y - 1, 0xF) == 0xF) || y <= 0) return WALL_COLOR_DOWN;

@@ -10,7 +10,9 @@
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 800
 
-#define FOV 60
+#define FOV 0
+#define FOV_VERTICAL 60
+#define PLAYER_HEIGHT 0.5
 
 #define DEGRE 57.2958
 
@@ -79,6 +81,7 @@ typedef struct s_render
 	void *window_3D;
 	t_img *wall_img;
     t_img *box_img;
+    t_img *ground_img;
 } t_render;
 
 typedef struct s_vars
@@ -121,6 +124,7 @@ void render_dot(t_vars *vars, int x, int y, int color);
 void render_3D(t_vars *vars);
 int get_pixel_img(t_img *img, int x, int y);
 int multiplie_color(int color, double multiple);
+t_img* load_img(void* mlx, char* file_name, int *size_x, int *size_y);
 
 //raycast.c
 t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir);
