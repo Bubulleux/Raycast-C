@@ -141,19 +141,28 @@ void render_3D(t_vars *vars)
 	{
 		double add_angle = ((double)x * (double)FOV / (double)WIN_HEIGHT) - FOV / 2;
 		double cur_angle = angle_dir - add_angle;
+
 		t_raycast raycast = calc_raycast(vars, vars->player->position, new_vector(sin((cur_angle) / DEGRE), cos((cur_angle) / DEGRE)));
+
 		double view_hit_ground_dist = tan((90 - (FOV_VERTICAL / 2)) / DEGRE) * PLAYER_HEIGHT;
-		int wall_height = (int)((double)WIN_HEIGHT / raycast.hit_dist / cos(add_angle / DEGRE));
-		wall_height = (view_hit_ground_dist / raycast.hit_dist / cos(add_angle / DEGRE)) * 800;
+
+		int wall_height = (view_hit_ground_dist / raycast.hit_dist / cos(add_angle / DEGRE)) * 800;
+
+		double wall_angle_see = 90 - (atan(raycast.hit_dist / PLAYER_HEIGHT) * DEGRE);
+		wall_angle_see /= cos(add_angle / DEGRE);
+		double ground_angle_see = (FOV_VERTICAL - wall_angle_see) / 2;
+
 		int ground_height = (WIN_WIDTH - wall_height) / 2;
+
 		bool fist_gourd = true;
 		for (int y = 0; y < WIN_HEIGHT; y++)
 		{
-		    double cur_angle_vertical = y * FOV_VERTICAL / (double)WIN_HEIGHT;
+		    double cur_angle_vertical = y * FOV_VERTICAL / (double)WIN_HEIGHT - FOV_VERTICAL / 2;
+		    //cur_angle_vertical /= cos(add_angle / DEGRE);
 		    //printf("%f\n", cur_angle_vertical);
 			int color;
-			if (y < ground_height) color = SKY_COLOR;
-			else if (y < ground_height + wall_height) 
+			if (cur_angle_vertical < -wall_angle_see) color = SKY_COLOR;
+			else if (cur_angle_vertical < wall_angle_see)
 			{
 			    char wall_type = get_map_value(vars, raycast.map_box_hit.x, raycast.map_box_hit.y, 0xF0);
 			    t_img *wall_img = NULL;
@@ -169,13 +178,14 @@ void render_3D(t_vars *vars)
                         break;
 
                 }
-				color = get_pixel_img(wall_img, (int)(raycast.x_hit * TEXTURE_SIZE), (int)((y - ground_height) / (double)wall_height * TEXTURE_SIZE));
+				color = get_pixel_img(wall_img, (int)(raycast.x_hit * TEXTURE_SIZE), (int)((cur_angle_vertical + wall_angle_see) / (wall_angle_see * 2) * TEXTURE_SIZE));
 				color = multiplie_color(color, raycast.hit_color);
+				//color = 0xff0000;
 				//printf(" y: %d %d %f,", y, color, raycast.hit_color);
 			}
 			else
 			{
-			    double angle = 90 - (cur_angle_vertical - (FOV_VERTICAL / 2));
+			    double angle = 90 - (cur_angle_vertical);
 			    //angle = atan(raycast.hit_dist / PLAYER_HEIGHT) * DEGRE;
 			    //angle /= cos(add_angle / DEGRE);
 			    double dist_groud = tan(angle / DEGRE) * PLAYER_HEIGHT / cos(add_angle / DEGRE);
@@ -185,7 +195,7 @@ void render_3D(t_vars *vars)
                                                 vars->player->position.y + cos(cur_angle / DEGRE) * dist_groud);
                 if (fist_gourd)
                 {
-                    printf("%f %f %f %f\n", angle, atan(raycast.hit_dist / PLAYER_HEIGHT) * DEGRE, dist_groud, raycast.hit_dist);
+                    //printf("%f %f %f %f\n", angle, atan(raycast.hit_dist / PLAYER_HEIGHT) * DEGRE, dist_groud, raycast.hit_dist);
                     render_dot(vars, pixel_pos.x * WIN_WIDTH / vars->width_m, pixel_pos.y * WIN_HEIGHT / vars->height_m, 0xff00ff);
                 }
                 color = GROUND_COLOR;

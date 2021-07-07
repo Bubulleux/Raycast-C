@@ -7,11 +7,11 @@
 #include <sys/time.h>
 
 //----------Const----------
-#define WIN_WIDTH 800
+#define WIN_WIDTH 1200
 #define WIN_HEIGHT 800
 
-#define FOV 0
-#define FOV_VERTICAL 60
+#define FOV 90
+#define FOV_VERTICAL 90
 #define PLAYER_HEIGHT 0.5
 
 #define DEGRE 57.2958
