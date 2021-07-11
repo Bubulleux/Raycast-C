@@ -86,10 +86,10 @@ t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir)
 
 double collide_face(t_vars *vars, double x, double y)
 {
-    if (y >= (vars->height_m - 0.01)) return WALL_COLOR_UP;
-    if (y <= 0.01) return WALL_COLOR_DOWN;
-    if (x >= (vars->width_m - 0.01)) return WALL_COLOR_LEFT;
-    if (x <= 0.01) return WALL_COLOR_RIGHT;
+//    if (y >= (vars->height_m - 0.01)) return WALL_COLOR_UP;
+//    if (y <= 0.01) return WALL_COLOR_DOWN;
+//    if (x >= (vars->width_m - 0.01)) return WALL_COLOR_LEFT;
+//    if (x <= 0.01) return WALL_COLOR_RIGHT;
 
 	if ((fmod(y, 1) == 0 && get_map_value(vars, x, y, 0xF) == 0xF) || y >= vars->height_m) return WALL_COLOR_UP;
 	if ((fmod(y, 1) == 0 && get_map_value(vars, x, y - 1, 0xF) == 0xF) || y <= 0) return WALL_COLOR_DOWN;

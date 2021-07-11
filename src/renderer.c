@@ -6,7 +6,7 @@ void init_mlx(t_vars *vars)
 	
 	vars->render->mlx = mlx_init();
 	vars->render->window_3D = mlx_new_window(vars->render->mlx, WIN_WIDTH, WIN_HEIGHT, "3D Render");
-	vars->render->window = mlx_new_window(vars->render->mlx, WIN_WIDTH, WIN_HEIGHT, "Raycast-C");
+	//vars->render->window = mlx_new_window(vars->render->mlx, WIN_WIDTH, WIN_HEIGHT, "Raycast-C");
 
 	t_render *render = vars->render;
 	int size;
@@ -14,6 +14,7 @@ void init_mlx(t_vars *vars)
 	render->wall_img = load_img(render->mlx, "texture/wall.xpm", &size, &size);
 	render->box_img = load_img(render->mlx, "texture/box.xpm", &size, &size);;
     render->ground_img = load_img(render->mlx, "texture/ground.xpm", &size, &size);
+    render->player_map_img = load_img(render->mlx, "texture/player_map.xpm", &size, &size);
 }
 
 t_img* load_img(void* mlx, char* file_name, int *size_x, int *size_y)
@@ -117,20 +118,20 @@ void render_dot(t_vars *vars, int x, int y, int color)
 
 void render_3D(t_vars *vars)
 {
-	t_vector mouse_pos;
-	int x;
-	int y;
-	mlx_mouse_get_pos(vars->render->mlx, vars->render->window, &x, &y);
-	mouse_pos.x = ((double)x / (double)WIN_WIDTH * vars->width_m) - vars->player->position.x;
-	mouse_pos.y = ((double)y / (double)WIN_HEIGHT * vars->height_m) - vars->player->position.y;
-	//printf("\r%f %f    %f %f             ", mouse_pos.x, mouse_pos.y, x / (double)WIN_WIDTH, y / (double)WIN_HEIGHT);
-	t_vector dir = vector_get_normal(mouse_pos);
-	double angle_dir = acos(dir.y) * DEGRE * (dir.x < 0 ? -1 : 1);
-	angle_dir = vars->player->angle;
+//	t_vector mouse_pos;
+//	int x;
+//	int y;
+//	mlx_mouse_get_pos(vars->render->mlx, vars->render->window, &x, &y);
+//	mouse_pos.x = ((double)x / (double)WIN_WIDTH * vars->width_m) - vars->player->position.x;
+//	mouse_pos.y = ((double)y / (double)WIN_HEIGHT * vars->height_m) - vars->player->position.y;
+//	//printf("\r%f %f    %f %f             ", mouse_pos.x, mouse_pos.y, x / (double)WIN_WIDTH, y / (double)WIN_HEIGHT);
+//	t_vector dir = vector_get_normal(mouse_pos);
+//	double angle_dir = acos(dir.y) * DEGRE * (dir.x < 0 ? -1 : 1);
+	double angle_dir = vars->player->angle_x;
 	
-	//if (vars->player->angle == angle_dir) return;
+	//if (vars->player->angle_x == angle_dir) return;
 
-	render_grid(vars, WIN_HEIGHT / vars->height_m);
+	//render_grid(vars, WIN_HEIGHT / vars->height_m);
 
 	t_render *render = vars->render;
 	t_img *img = malloc(sizeof(t_img));
@@ -139,68 +140,91 @@ void render_3D(t_vars *vars)
 
 	for (int x = 0; x < WIN_WIDTH; x++)
 	{
-		double add_angle = ((double)x * (double)FOV / (double)WIN_HEIGHT) - FOV / 2;
+		double add_angle = ((double)x * (double)FOV / (double)WIN_WIDTH) - FOV / 2;
 		double cur_angle = angle_dir - add_angle;
 
 		t_raycast raycast = calc_raycast(vars, vars->player->position, new_vector(sin((cur_angle) / DEGRE), cos((cur_angle) / DEGRE)));
 
-		double view_hit_ground_dist = tan((90 - (FOV_VERTICAL / 2)) / DEGRE) * PLAYER_HEIGHT;
+		//double view_hit_ground_dist = tan((90 - (FOV_VERTICAL / 2)) / DEGRE) * PLAYER_HEIGHT;
 
-		int wall_height = (view_hit_ground_dist / raycast.hit_dist / cos(add_angle / DEGRE)) * 800;
+		//int wall_height = (view_hit_ground_dist / raycast.hit_dist) * 800;
 
 		double wall_angle_see = 90 - (atan(raycast.hit_dist / PLAYER_HEIGHT) * DEGRE);
 		wall_angle_see /= cos(add_angle / DEGRE);
-		double ground_angle_see = (FOV_VERTICAL - wall_angle_see) / 2;
+		//double ground_angle_see = (FOV_VERTICAL - wall_angle_see) / 2;
 
-		int ground_height = (WIN_WIDTH - wall_height) / 2;
+		//int ground_height = (WIN_WIDTH - wall_height) / 2;
 
-		bool fist_gourd = true;
 		for (int y = 0; y < WIN_HEIGHT; y++)
 		{
-		    double cur_angle_vertical = y * FOV_VERTICAL / (double)WIN_HEIGHT - FOV_VERTICAL / 2;
+		    double cur_angle_vertical = y * FOV_VERTICAL / (double)WIN_HEIGHT - FOV_VERTICAL / 2 + vars->player->angle_y;
 		    //cur_angle_vertical /= cos(add_angle / DEGRE);
 		    //printf("%f\n", cur_angle_vertical);
 			int color;
 			if (cur_angle_vertical < -wall_angle_see) color = SKY_COLOR;
 			else if (cur_angle_vertical < wall_angle_see)
 			{
-			    char wall_type = get_map_value(vars, raycast.map_box_hit.x, raycast.map_box_hit.y, 0xF0);
-			    t_img *wall_img = NULL;
-                switch (wall_type) {
-                    case 0x00:
-                        wall_img = render->wall_img;
-                        break;
-                    case 0x10:
-                        wall_img = render->box_img;
-                        break;
-                    default:
-                        wall_img = render->wall_img;
-                        break;
-
+			    if (raycast.hit_dist >= FOG_FULL)
+                {
+                    color = SKY_COLOR;
                 }
-				color = get_pixel_img(wall_img, (int)(raycast.x_hit * TEXTURE_SIZE), (int)((cur_angle_vertical + wall_angle_see) / (wall_angle_see * 2) * TEXTURE_SIZE));
-				color = multiplie_color(color, raycast.hit_color);
-				//color = 0xff0000;
-				//printf(" y: %d %d %f,", y, color, raycast.hit_color);
+			    else
+                {
+                    char wall_type = get_map_value(vars, raycast.map_box_hit.x, raycast.map_box_hit.y, 0xF0);
+                    t_img *wall_img = NULL;
+                    switch (wall_type) {
+                        case 0x00:
+                            wall_img = render->wall_img;
+                            break;
+                        case 0x10:
+                            wall_img = render->box_img;
+                            break;
+                        default:
+                            wall_img = render->wall_img;
+                            break;
+
+                    }
+                    color = get_pixel_img(wall_img, (int)(raycast.x_hit * TEXTURE_SIZE), (int)((cur_angle_vertical + wall_angle_see) / (wall_angle_see * 2) * TEXTURE_SIZE));
+                    color = multiplie_color(color, raycast.hit_color);
+                    if (raycast.hit_dist >= FOG_START)
+                    {
+                        color = color_mean(SKY_COLOR, color, (raycast.hit_dist - FOG_START) / (FOG_FULL - FOG_START));
+                    }
+
+                    //color = 0xff0000;
+                    //printf(" y: %d %d %f,", y, color, raycast.hit_color);
+                }
 			}
 			else
 			{
 			    double angle = 90 - (cur_angle_vertical);
+			    if (angle <= 0)
+                {
+                    continue;
+                }
 			    //angle = atan(raycast.hit_dist / PLAYER_HEIGHT) * DEGRE;
 			    //angle /= cos(add_angle / DEGRE);
 			    double dist_groud = tan(angle / DEGRE) * PLAYER_HEIGHT / cos(add_angle / DEGRE);
-			    int groud_pixel_index = y - (ground_height + wall_height);
-			    //dist_groud = raycast.hit_dist - (groud_pixel_index * (raycast.hit_dist - view_hit_ground_dist) / (double)ground_height);
-			    t_vector pixel_pos = new_vector(vars->player->position.x + sin(cur_angle / DEGRE) * dist_groud,
-                                                vars->player->position.y + cos(cur_angle / DEGRE) * dist_groud);
-                if (fist_gourd)
+                if (dist_groud >= FOG_FULL)
                 {
-                    //printf("%f %f %f %f\n", angle, atan(raycast.hit_dist / PLAYER_HEIGHT) * DEGRE, dist_groud, raycast.hit_dist);
-                    render_dot(vars, pixel_pos.x * WIN_WIDTH / vars->width_m, pixel_pos.y * WIN_HEIGHT / vars->height_m, 0xff00ff);
+                    color = SKY_COLOR;
                 }
-                color = GROUND_COLOR;
-                fist_gourd = false;
-			    color = get_pixel_img(render->ground_img, abs((int)(fmod(pixel_pos.x, 1.0) * TEXTURE_SIZE)), abs((int)(fmod(pixel_pos.y, 1.0) * TEXTURE_SIZE)));
+                else
+                {
+                    //int groud_pixel_index = y - (ground_height + wall_height);
+                    //dist_groud = raycast.hit_dist - (groud_pixel_index * (raycast.hit_dist - view_hit_ground_dist) / (double)ground_height);
+                    t_vector pixel_pos = new_vector(vars->player->position.x + sin(cur_angle / DEGRE) * dist_groud,
+                                                    vars->player->position.y + cos(cur_angle / DEGRE) * dist_groud);
+
+                    //color = GROUND_COLOR;
+                    color = get_pixel_img(render->ground_img,   abs((int)(fmod(pixel_pos.x, 1.0) * TEXTURE_SIZE)),
+                                                                abs((int)(fmod(pixel_pos.y, 1.0) * TEXTURE_SIZE)));
+                    if (dist_groud >= FOG_START)
+                    {
+                        color = color_mean(SKY_COLOR, color, (dist_groud - FOG_START) / (FOG_FULL - FOG_START));
+                    }
+                }
+
 			}
 			set_pixel_img(img, x, y, color);
 			//printf("set pixel color %d\n", color);
@@ -208,9 +232,107 @@ void render_3D(t_vars *vars)
 		//printf("\n");
 		//printf("\rx_hit %f", raycast.x_hit);
 	}
+
+	if (vars->input->enter_pressed == 1)
+    {
+        render_mini_map(vars, img);
+    }
 	mlx_put_image_to_window(render->mlx, render->window_3D, img->img, 0, 0);
 	mlx_destroy_image(render->mlx, img->img);
 	free(img);
 
+}
+
+int color_mean(int color_a, int color_b, double coef_a)
+{
+//    printf("\n");
+//    printf("%06x %06x %f\n", color_a, color_b, coef_a);
+    char R = (char)(((color_a >> 16) & 0xFF) * coef_a + ((color_b >> 16) & 0xFF) * (1 - coef_a));
+    char G = (char)(((color_a >> 8) & 0xFF) * coef_a + ((color_b >> 8) & 0xFF) * (1 - coef_a));
+    char B = (char)(((color_a >> 0) & 0xFF) * coef_a + ((color_b >> 0) & 0xFF) * (1 - coef_a));
+//    printf("%02x %02x %02x\n", (R & 0xFF), (G & 0xFF), (B & 0xFF));
+    int out = (R & 0xFF);
+    out = (out << 8) | (G & 0xFF);
+    out = (out << 8) | (B & 0xFF);
+//    printf("%02x%02x%02x %06x\n", (R & 0xFF), (G & 0xFF), (B & 0xFF), out);
+    return out;
+}
+
+void render_mini_map(t_vars *vars, t_img *img)
+{
+    t_render *render = vars->render;
+    int cell_size = (int)(WIN_WIDTH / vars->width_m * 0.8);
+    int img_width = cell_size * vars->width_m;
+    int img_height = cell_size * vars->height_m;
+    int offset_x = (WIN_WIDTH - img_width) / 2;
+    int offset_y = (WIN_HEIGHT - img_height) / 2;
+
+
+    for (int y = 0; y < img_height; y++)
+    {
+        for (int x = 0; x < img_width; x++)
+        {
+            int color = 0xff00ff;
+            if ((x % cell_size) < 2 || (x % cell_size) >= (cell_size - 2) || (y % cell_size) < 2 || (y % cell_size) >= (cell_size - 2))
+            {
+                color = 0x0;
+            }
+            else
+            {
+                t_img *img = NULL;
+                switch (get_map_value(vars, x * vars->width_m / img_width, y * vars->height_m / img_height, 0xFF)) {
+                    case 0x0F:
+                        img = render->wall_img;
+                        break;
+                    case 0x1F:
+                        img = render->box_img;
+                        break;
+                    case 0x00:
+                        img = render->ground_img;
+                        break;
+                }
+                color = get_pixel_img(img, (x % cell_size) * TEXTURE_SIZE / cell_size, (y % cell_size) * TEXTURE_SIZE / cell_size);
+            }
+            set_pixel_img(img, offset_x + x, offset_y + y, color);
+        }
+    }
+
+    for (int _y = 0; _y < cell_size; _y++)
+    {
+        for (int _x = 0; _x < cell_size; _x++)
+        {
+            int color;
+            int x = (vars->player->position.x * img_width / vars->width_m) - cell_size / 2 + offset_x + _x;
+            int y = (vars->player->position.y * img_height / vars->height_m) - cell_size / 2 + offset_y + _y;
+            double magnetude = vector_get_magnetude(new_vector(_x - cell_size / 2, _y - cell_size / 2));
+
+            if (magnetude > cell_size * 0.35 || x < offset_x || x >= offset_x + img_width || y < offset_y || y >= offset_y + img_height)
+            {
+                //printf("%d %d          %d %d ", x, y, _x, _y);
+                //printf("continue\n");
+                continue;
+            }
+            else if (magnetude > cell_size * 0.3)
+            {
+                color = 0x999999;
+            }
+            else
+            {
+                color = 0xeeeeee;
+            }
+            //printf("Pixel Render \n");
+            set_pixel_img(img, x, y, color);
+        }
+    }
+    //printf("MiniMap has been rendered\n");
+
+}
+
+t_img* new_img(void* mlx, int width, int height)
+{
+    t_img *img = malloc(sizeof(t_img));
+    img->img = mlx_new_image(mlx, width, height);
+    img->addr = mlx_get_data_addr(img->img, &img->bit_per_pixel, &img->size_line, &img->endian);
+    return img;
 }
 

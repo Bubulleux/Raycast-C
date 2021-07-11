@@ -7,24 +7,24 @@
 #include <sys/time.h>
 
 //----------Const----------
-#define WIN_WIDTH 1200
+#define WIN_WIDTH 800
 #define WIN_HEIGHT 800
 
-#define FOV 90
-#define FOV_VERTICAL 90
+#define FOV 50
+#define FOV_VERTICAL 50
 #define PLAYER_HEIGHT 0.5
 
 #define DEGRE 57.2958
 
 #define SPEED 1
+#define COLIDE_BOX_SIZE 0.1
 
 #define FPS 60
 
 #define MAP "map.txt"
-#define MAP_NULL 0x99
 
 //Color
-#define SKY_COLOR 0x00ffff
+#define SKY_COLOR 0x83b9de
 #define WALL_COLOR_UP 1
 #define WALL_COLOR_DOWN 0.3
 #define WALL_COLOR_LEFT 0.6
@@ -32,11 +32,16 @@
 #define GROUND_COLOR 0x333333
 #define TEXTURE_SIZE 16
 
+#define FOG_START 7
+#define FOG_FULL 12
+
 //Input
 #define UP_ARROW 65362
 #define DOWN_ARROW 65364
 #define LEFT_ARROW 65361
 #define RIGHT_ARROW 65363
+#define MINI_MAP_INPUT 65293
+#define ESCAPE_BTN 65307
 #define SENSITIVITY 3.0
 
 
@@ -63,6 +68,8 @@ typedef struct s_input
 	int down_pressed;
 	int left_pressed;
 	int right_pressed;
+    int enter_pressed;
+    char lock_mouse;
 	t_vector mouse_pos;
 	t_vector mouse_delta;
 } t_input;
@@ -70,7 +77,8 @@ typedef struct s_input
 typedef struct s_player
 {
 	t_vector position;
-	double angle;
+	double angle_x;
+    double angle_y;
 } t_player;
 
 
@@ -82,6 +90,7 @@ typedef struct s_render
 	t_img *wall_img;
     t_img *box_img;
     t_img *ground_img;
+    t_img *player_map_img;
 } t_render;
 
 typedef struct s_vars
@@ -113,7 +122,7 @@ typedef struct s_raycast
 
 //main.c
 int update(t_vars *vars);
-char get_map_value(t_vars *vars, int x, int y, char layer);
+char get_map_value(t_vars *vars, double x, double y, char layer);
 long long current_timestamp();
 
 //renderer.c
@@ -125,6 +134,9 @@ void render_3D(t_vars *vars);
 int get_pixel_img(t_img *img, int x, int y);
 int multiplie_color(int color, double multiple);
 t_img* load_img(void* mlx, char* file_name, int *size_x, int *size_y);
+void render_mini_map(t_vars *vars, t_img *img);
+t_img* new_img(void* mlx, int width, int height);
+int color_mean(int color_a, int color_b, double coef_a);
 
 //raycast.c
 t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir);
@@ -146,8 +158,9 @@ void init_input(t_vars *vars);
 void update_mouse(t_input *input, t_vars *vars);
 
 //player.c
-void update_player(t_input *input, t_player *player, double deltat_ime);
+void update_player(t_vars *vars, t_input *input, t_player *player, double deltat_ime);
 void init_player(t_vars *vars);
+bool check_collide(t_vars *vars, t_vector pos, double box_size);
 
 //map_parser.c
 char* parse_file(char *file_name);
