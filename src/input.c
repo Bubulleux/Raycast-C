@@ -1,7 +1,8 @@
 #include "define.h"
 
-int key_pressed(int key, t_input *input)
+int key_pressed(int key, t_vars *vars)
 {
+    t_input *input = vars->input;
     //printf("keyPressed: %d\n", key);
 	if (key == UP_ARROW) input->up_pressed = 1;
 	if (key == DOWN_ARROW) input->down_pressed = 1;
@@ -10,6 +11,11 @@ int key_pressed(int key, t_input *input)
     if (key == MINI_MAP_INPUT) input->enter_pressed = 1;
     if (key == ESCAPE_BTN)
     {
+
+        if (input->lock_mouse == 0x00)
+        {
+            mlx_loop_end(vars->render->mlx);
+        }
         input->lock_mouse = 0x00;
     }
 }
@@ -28,7 +34,7 @@ int key_relased(int key, t_input *input)
 void init_input(t_vars *vars)
 {
 	vars->input = malloc(sizeof(t_input));
-	mlx_hook(vars->render->window_3D, 2, 1L<<0, key_pressed, vars->input);
+	mlx_hook(vars->render->window_3D, 2, 1L<<0, key_pressed, vars);
 	mlx_hook(vars->render->window_3D, 3, 1L<<1, key_relased, vars->input);
 	vars->input->up_pressed = 0;
 	vars->input->down_pressed = 0;

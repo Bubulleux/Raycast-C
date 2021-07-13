@@ -38,7 +38,19 @@ int main()
 	return 0;
 }
 
+void free_all(t_vars *vars)
+{
+    free_render(vars->render);
+    free(vars->input);
+    free(vars->player);
 
+    for(int i = 0; i < vars->width_m; i++)
+        free(vars->map[i]);
+    free(vars->map);
+
+    free(vars);
+
+}
 
 int update(t_vars *vars)
 {

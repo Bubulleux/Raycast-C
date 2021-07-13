@@ -150,14 +150,14 @@ void render_3D(t_vars *vars)
 		//int wall_height = (view_hit_ground_dist / raycast.hit_dist) * 800;
 
 		double wall_angle_see = 90 - (atan(raycast.hit_dist / PLAYER_HEIGHT) * DEGRE);
-		wall_angle_see /= cos(add_angle / DEGRE);
+		//wall_angle_see /= cos(add_angle / DEGRE);
 		//double ground_angle_see = (FOV_VERTICAL - wall_angle_see) / 2;
 
 		//int ground_height = (WIN_WIDTH - wall_height) / 2;
 
 		for (int y = 0; y < WIN_HEIGHT; y++)
 		{
-		    double cur_angle_vertical = y * FOV_VERTICAL / (double)WIN_HEIGHT - FOV_VERTICAL / 2 + vars->player->angle_y;
+		    double cur_angle_vertical = y * (FOV_VERTICAL * cos(add_angle / DEGRE)) / (double)WIN_HEIGHT - (FOV_VERTICAL * cos(add_angle / DEGRE)) / 2  + vars->player->angle_y;
 		    //cur_angle_vertical /= cos(add_angle / DEGRE);
 		    //printf("%f\n", cur_angle_vertical);
 			int color;
@@ -204,7 +204,7 @@ void render_3D(t_vars *vars)
                 }
 			    //angle = atan(raycast.hit_dist / PLAYER_HEIGHT) * DEGRE;
 			    //angle /= cos(add_angle / DEGRE);
-			    double dist_groud = tan(angle / DEGRE) * PLAYER_HEIGHT / cos(add_angle / DEGRE);
+			    double dist_groud = tan(angle / DEGRE) * PLAYER_HEIGHT/* / cos(add_angle / DEGRE)*/;
                 if (dist_groud >= FOG_FULL)
                 {
                     color = SKY_COLOR;
@@ -216,13 +216,13 @@ void render_3D(t_vars *vars)
                     t_vector pixel_pos = new_vector(vars->player->position.x + sin(cur_angle / DEGRE) * dist_groud,
                                                     vars->player->position.y + cos(cur_angle / DEGRE) * dist_groud);
 
-                    //color = GROUND_COLOR;
                     color = get_pixel_img(render->ground_img,   abs((int)(fmod(pixel_pos.x, 1.0) * TEXTURE_SIZE)),
                                                                 abs((int)(fmod(pixel_pos.y, 1.0) * TEXTURE_SIZE)));
                     if (dist_groud >= FOG_START)
                     {
                         color = color_mean(SKY_COLOR, color, (dist_groud - FOG_START) / (FOG_FULL - FOG_START));
                     }
+                    //color = GROUND_COLOR;
                 }
 
 			}
@@ -335,4 +335,19 @@ t_img* new_img(void* mlx, int width, int height)
     img->addr = mlx_get_data_addr(img->img, &img->bit_per_pixel, &img->size_line, &img->endian);
     return img;
 }
+void free_img(void *mlx, t_img *img)
+{
+    mlx_destroy_image(mlx, img->img);
+    free(img);
+}
 
+void free_render(t_render *render)
+{
+    mlx_destroy_window(render->mlx, render->window_3D);
+    free_img(render->mlx, render->ground_img);
+    free_img(render->mlx, render->box_img);
+    free_img(render->mlx, render->wall_img);
+    free_img(render->mlx, render->player_map_img);
+    mlx_destroy_display(render->mlx);
+    free(render);
+}

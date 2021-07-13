@@ -124,6 +124,7 @@ typedef struct s_raycast
 int update(t_vars *vars);
 char get_map_value(t_vars *vars, double x, double y, char layer);
 long long current_timestamp();
+void free_all(t_vars *vars);
 
 //renderer.c
 void init_mlx(t_vars *vars);
@@ -137,6 +138,8 @@ t_img* load_img(void* mlx, char* file_name, int *size_x, int *size_y);
 void render_mini_map(t_vars *vars, t_img *img);
 t_img* new_img(void* mlx, int width, int height);
 int color_mean(int color_a, int color_b, double coef_a);
+void free_img(void *mlx, t_img *img);
+void free_render(t_render *render);
 
 //raycast.c
 t_raycast calc_raycast(t_vars *vars, t_vector origin, t_vector dir);
@@ -152,7 +155,7 @@ t_vector get_intersection(double a, double b, double a_prime, double b_prime);
 void set_vector(t_vector *vector, double x, double y);
 
 //input.c
-int key_pressed(int key, t_input *input);
+int key_pressed(int key, t_vars *vars);
 int key_relased(int key, t_input *input);
 void init_input(t_vars *vars);
 void update_mouse(t_input *input, t_vars *vars);

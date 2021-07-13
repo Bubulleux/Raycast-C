@@ -10,7 +10,7 @@ void update_player(t_vars *vars, t_input *input, t_player *player, double deltat
 	player->angle_x = fmod(player->angle_x + -input->mouse_delta.x / 10 * SENSITIVITY, 360);
 	player->angle_x = player->angle_x < 0 ? 360 - player->angle_x : player->angle_x;
 
-    player->angle_y = player->angle_y + input->mouse_delta.y / 10 * SENSITIVITY;
+    //player->angle_y = player->angle_y + input->mouse_delta.y / 10 * SENSITIVITY;
     if (player->angle_y > 90) player->angle_y = 90;
     if (player->angle_y < -90) player->angle_y = -90;
     //printf("\r%f    ", player->angle_y);
